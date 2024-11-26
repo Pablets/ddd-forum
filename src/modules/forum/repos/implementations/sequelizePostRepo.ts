@@ -10,6 +10,7 @@ import { IPostVotesRepo } from "../postVotesRepo";
 import { PostVotes } from "../../domain/postVotes";
 import { MemberId } from "../../domain/memberId";
 import { Comments } from "../../domain/comments";
+import { sequelize } from '../../../../shared/infra/database/sequelize/config/sequelize';
 
 export class PostRepo implements IPostRepo {
 
@@ -36,12 +37,12 @@ export class PostRepo implements IPostRepo {
     return {
       where: {},
       include: [
-        { 
-          model: models.Member, 
-          as: 'Member', 
+        {
+          model: models.Member,
+          as: 'Member',
           include: [
             { model: models.BaseUser, as: 'BaseUser' }
-          ] 
+          ]
         }
       ],
       limit: 15,
@@ -50,8 +51,8 @@ export class PostRepo implements IPostRepo {
   }
 
   public async getPostByPostId (postId: PostId | string): Promise<Post> {
-    postId  = postId instanceof PostId 
-    ? (<PostId>postId).getStringValue() 
+    postId  = postId instanceof PostId
+    ? (<PostId>postId).getStringValue()
     : postId;
     const PostModel = this.models.Post;
     const detailsQuery = this.createBaseQuery();
@@ -63,11 +64,11 @@ export class PostRepo implements IPostRepo {
   }
 
   public async getNumberOfCommentsByPostId (postId: PostId | string): Promise<number> {
-    postId  = postId instanceof PostId 
-    ? (<PostId>postId).getStringValue() 
+    postId  = postId instanceof PostId
+    ? (<PostId>postId).getStringValue()
     : postId;
 
-    const result = await this.models.sequelize.query(
+    const result = await sequelize.query(
       `SELECT COUNT(*) FROM comment WHERE post_id = "${postId}";`
     );
     const count = result[0][0]['COUNT(*)'];
@@ -88,7 +89,7 @@ export class PostRepo implements IPostRepo {
     const PostModel = this.models.Post;
     const detailsQuery = this.createBaseDetailsQuery();
     detailsQuery.offset = offset ? offset : detailsQuery.offset;
-    
+
     const posts = await PostModel.findAll(detailsQuery);
     return posts.map((p) => PostDetailsMap.toDomain(p))
   }
@@ -142,14 +143,14 @@ export class PostRepo implements IPostRepo {
     const exists = await this.exists(post.postId);
     const isNewPost = !exists;
     const rawSequelizePost = await PostMap.toPersistence(post);
-    
+
     if (isNewPost) {
 
       try {
         await PostModel.create(rawSequelizePost);
         await this.saveComments(post.comments);
         await this.savePostVotes(post.getVotes());
-        
+
       } catch (err) {
         await this.delete(post.postId);
         throw new Error(err.toString())
@@ -160,11 +161,11 @@ export class PostRepo implements IPostRepo {
       // so that any domain events on the aggregate get dispatched
       await this.saveComments(post.comments);
       await this.savePostVotes(post.getVotes());
-      
-      await PostModel.update(rawSequelizePost, { 
+
+      await PostModel.update(rawSequelizePost, {
         // To make sure your hooks always run, make sure to include this in
         // the query
-        individualHooks: true,  
+        individualHooks: true,
         hooks: true,
         where: { post_id: post.postId.getStringValue() }
       });

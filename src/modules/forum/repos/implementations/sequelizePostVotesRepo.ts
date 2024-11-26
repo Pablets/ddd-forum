@@ -6,6 +6,7 @@ import { PostId } from "../../domain/postId";
 import { PostVoteMap } from "../../mappers/postVoteMap";
 import { VoteType } from "../../domain/vote";
 import { PostVotes } from "../../domain/postVotes";
+import { sequelize } from '../../../../shared/infra/database/sequelize/config/sequelize';
 
 export class PostVotesRepo implements IPostVotesRepo {
   private models: any;
@@ -57,8 +58,8 @@ export class PostVotesRepo implements IPostVotesRepo {
 
   public async delete (vote: PostVote): Promise<any> {
     const PostVoteModel = this.models.PostVote;
-    return PostVoteModel.destroy({ 
-      where: { 
+    return PostVoteModel.destroy({
+      where: {
         post_id: vote.postId.getStringValue(),
         member_id: vote.memberId.getStringValue()
       }
@@ -76,13 +77,14 @@ export class PostVotesRepo implements IPostVotesRepo {
   }
 
   async countPostUpvotesByPostId (postId: PostId| string): Promise<number> {
-    postId  = postId instanceof PostId 
-    ? (<PostId>postId).getStringValue() 
+    postId  = postId instanceof PostId
+    ? (<PostId>postId).getStringValue()
     : postId;
 
-    const result = await this.models.sequelize.query(
-      `select COUNT(*) 
-        from post_vote 
+    const result = await sequelize
+    .query(
+      `select COUNT(*)
+        from post_vote
         where post_id = "${postId}"
         and type = "UPVOTE"`
     );
@@ -92,13 +94,13 @@ export class PostVotesRepo implements IPostVotesRepo {
   }
 
   async countPostDownvotesByPostId (postId: PostId | string): Promise<number> {
-    postId  = postId instanceof PostId 
-    ? (<PostId>postId).getStringValue() 
+    postId  = postId instanceof PostId
+    ? (<PostId>postId).getStringValue()
     : postId;
 
-    const result = await this.models.sequelize.query(
-      `select COUNT(*) 
-        from post_vote 
+    const result = await sequelize.query(
+      `select COUNT(*)
+        from post_vote
         where post_id = "${postId}"
         and type = "DOWNVOTE"`
     );
