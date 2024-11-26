@@ -17,7 +17,7 @@ export class Result<T> {
     this.isFailure = !isSuccess;
     this.error = error;
     this._value = value;
-    
+
     Object.freeze(this);
   }
 
@@ -25,7 +25,7 @@ export class Result<T> {
     if (!this.isSuccess) {
       console.log(this.error,);
       throw new Error("Can't get the value of an error result. Use 'errorValue' instead.")
-    } 
+    }
 
     return this._value;
   }
@@ -46,6 +46,12 @@ export class Result<T> {
     for (let result of results) {
       if (result.isFailure) return result;
     }
+    return Result.ok();
+  }
+
+  public static oneOf (resultA: Result<any>, resultB: Result<any>) : (Result<any>[] | Result<any>) {
+    if (resultA.isFailure && resultB.isFailure) return [resultA, resultB];
+    if (resultA.isSuccess && resultB.isSuccess) return [resultA, resultB];
     return Result.ok();
   }
 }
