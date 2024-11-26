@@ -2,6 +2,7 @@
 import { UserEmail } from "./userEmail";
 import { UserName } from "./userName";
 import { UserId } from "./userId";
+import { SocialAccessToken } from "./socialAccessToken";
 import { UserCreated } from "./events/userCreated";
 import { UserPassword } from "./userPassword";
 import { JWTToken, RefreshToken } from "./jwt";
@@ -15,13 +16,14 @@ import { AggregateRoot } from "../../../shared/domain/AggregateRoot";
 interface UserProps {
   email: UserEmail;
   username: UserName;
-  password: UserPassword;
+  password?: UserPassword;
   isEmailVerified?: boolean;
   isAdminUser?: boolean;
   accessToken?: JWTToken;
   refreshToken?: RefreshToken;
   isDeleted?: boolean;
   lastLogin?: Date;
+  socialAccessToken?: SocialAccessToken
 }
 
 export class User extends AggregateRoot<UserProps> {
@@ -41,6 +43,10 @@ export class User extends AggregateRoot<UserProps> {
 
   get password (): UserPassword {
     return this.props.password;
+  }
+
+  get socialAccessToken (): SocialAccessToken {
+    return this.props.socialAccessToken;
   }
 
   get accessToken (): string {
