@@ -1,86 +1,97 @@
-
-import { CreateUserDTO } from "./CreateUserDTO";
-import { CreateUserErrors } from "./CreateUserErrors";
-import { Either, Result, left, right } from "../../../../shared/core/Result";
-import { AppError } from "../../../../shared/core/AppError";
-import { IUserRepo } from "../../repos/userRepo";
-import { UseCase } from "../../../../shared/core/UseCase";
-import { UserEmail } from "../../domain/userEmail";
-import { UserPassword } from "../../domain/userPassword";
-import { UserName } from "../../domain/userName";
-import { User } from "../../domain/user";
+import { CreateUserDTO } from './CreateUserDTO';
+import { CreateUserErrors } from './CreateUserErrors';
+import { Either, Result, left, right } from '~/shared/core/Result';
+import { AppError } from '~/shared/core/AppError';
+import { IUserRepo } from '../../repos/userRepo';
+import { UseCase } from '../../../../shared/core/UseCase';
+import { UserEmail } from '../../domain/userEmail';
+import { UserPassword } from '../../domain/userPassword';
+import { UserName } from '../../domain/userName';
+import { User } from '../../domain/user';
+import { SocialAccessToken } from '../../domain/socialAccessToken';
 
 type Response = Either<
-  CreateUserErrors.EmailAlreadyExistsError |
-  CreateUserErrors.UsernameTakenError |
-  AppError.UnexpectedError |
-  Result<any>,
+  | CreateUserErrors.EmailAlreadyExistsError
+  | CreateUserErrors.UsernameTakenError
+  | AppError.UnexpectedError
+  | Result<any>,
   Result<void>
->
+>;
 
 export class CreateUserUseCase implements UseCase<CreateUserDTO, Promise<Response>> {
   private userRepo: IUserRepo;
-  
-  constructor (userRepo: IUserRepo) {
+
+  constructor(userRepo: IUserRepo) {
     this.userRepo = userRepo;
   }
 
-  async execute (request: CreateUserDTO): Promise<Response> {
+  async execute(request: CreateUserDTO): Promise<Response> {
     const emailOrError = UserEmail.create(request.email);
     const passwordOrError = UserPassword.create({ value: request.password });
     const usernameOrError = UserName.create({ name: request.username });
+    const socialAccessTokenOrError = SocialAccessToken.create({
+      accessToken: request.socialAccessToken,
+    });
 
-    const dtoResult = Result.combine([ 
-      emailOrError, passwordOrError, usernameOrError 
-    ]);
+    const authenticationOrError = Result.oneOf(passwordOrError, socialAccessTokenOrError);
+    if (Array.isArray(authenticationOrError)) {
+      if (authenticationOrError[0].isFailure && authenticationOrError[1].isFailure) {
+        return left(
+          Result.fail<void>('Cannot have two authentication methods at the same time')
+        ) as Response;
+      } else {
+        return left(Result.fail<void>('Needs one authentication method')) as Response;
+      }
+    }
+
+    const dtoResult = Result.combine([emailOrError, usernameOrError]);
 
     if (dtoResult.isFailure) {
       return left(Result.fail<void>(dtoResult.getErrorValue())) as Response;
     }
 
     const email: UserEmail = emailOrError.getValue();
-    const password: UserPassword = passwordOrError.getValue();
     const username: UserName = usernameOrError.getValue();
+    const password: UserPassword = socialAccessTokenOrError.isSuccess
+      ? undefined
+      : passwordOrError.getValue();
+    const socialAccessToken: SocialAccessToken = socialAccessTokenOrError.isSuccess
+      ? socialAccessTokenOrError.getValue()
+      : undefined;
 
     try {
       const userAlreadyExists = await this.userRepo.exists(email);
 
       if (userAlreadyExists) {
-        return left(
-          new CreateUserErrors.EmailAlreadyExistsError(email.value)
-        ) as Response;
+        return left(new CreateUserErrors.EmailAlreadyExistsError(email.value)) as Response;
       }
 
       try {
-        const alreadyCreatedUserByUserName = await this.userRepo
-        .getUserByUserName(username);
+        const alreadyCreatedUserByUserName = await this.userRepo.getUserByUserName(username);
 
         const userNameTaken = !!alreadyCreatedUserByUserName === true;
 
         if (userNameTaken) {
-          return left (
-            new CreateUserErrors.UsernameTakenError(username.value)
-          ) as Response;
+          return left(new CreateUserErrors.UsernameTakenError(username.value)) as Response;
         }
       } catch (err) {}
 
-
       const userOrError: Result<User> = User.create({
-        email, password, username,
+        email,
+        password,
+        username,
+        socialAccessToken,
       });
 
       if (userOrError.isFailure) {
-        return left(
-          Result.fail<User>(userOrError.getErrorValue().toString())
-        ) as Response;
+        return left(Result.fail<User>(userOrError.getErrorValue().toString())) as Response;
       }
 
       const user: User = userOrError.getValue();
 
       await this.userRepo.save(user);
 
-      return right(Result.ok<void>())
-
+      return right(Result.ok<void>());
     } catch (err) {
       return left(new AppError.UnexpectedError(err)) as Response;
     }

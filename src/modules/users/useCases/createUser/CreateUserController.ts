@@ -21,7 +21,8 @@ export class CreateUserController extends BaseController {
     dto = {
       username: TextUtils.sanitize(dto.username),
       email: TextUtils.sanitize(dto.email),
-      password: dto.password
+      password: dto.password,
+      socialAccessToken: dto.socialAccessToken
     }
 
     try {
@@ -29,7 +30,7 @@ export class CreateUserController extends BaseController {
 
       if (result.isLeft()) {
         const error = result.value;
-  
+
         switch (error.constructor) {
           case CreateUserErrors.UsernameTakenError:
             return this.conflict(res, error.getErrorValue().message)
@@ -38,7 +39,7 @@ export class CreateUserController extends BaseController {
           default:
             return this.fail(res, error.getErrorValue().message);
         }
-        
+
       } else {
         return this.ok(res);
       }
