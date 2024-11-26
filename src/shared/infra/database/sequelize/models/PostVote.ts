@@ -1,20 +1,22 @@
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/sequelize';
 
-
-export default (sequelize, DataTypes) => {
-  const PostVote = sequelize.define('post_vote', {
+const PostVote = sequelize.define(
+  'PostVote',
+  {
     post_vote_id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       allowNull: false,
-      primaryKey: true
+      primaryKey: true,
     },
     post_id: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
         model: 'post',
-        key: 'post_id'
-      }, 
+        key: 'post_id',
+      },
       onDelete: 'cascade',
       onUpdate: 'cascade',
     },
@@ -23,25 +25,22 @@ export default (sequelize, DataTypes) => {
       allowNull: false,
       references: {
         model: 'member',
-        key: 'member_id'
-      }, 
+        key: 'member_id',
+      },
       onDelete: 'cascade',
       onUpdate: 'cascade',
     },
     type: {
       type: DataTypes.STRING(10),
-      allowNull: false
-    }
-  },{
+      allowNull: false,
+    },
+  },
+  {
     timestamps: true,
-    underscored: true, 
-    tableName: 'post_vote'
-  });
-
-  PostVote.associate = (models) => {
-    PostVote.belongsTo(models.Member, { foreignKey: 'member_id', targetKey: 'member_id', as: 'Member' })
-    PostVote.belongsTo(models.Post, { foreignKey: 'post_id', targetKey: 'post_id', as: 'Post' })
+    underscored: true,
+    tableName: 'post_vote',
+    modelName: 'PostVote',
   }
+);
 
-  return PostVote;
-};
+export { PostVote };

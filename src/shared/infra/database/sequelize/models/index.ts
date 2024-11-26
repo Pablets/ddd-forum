@@ -1,61 +1,67 @@
+import { sequelize } from '../config/sequelize';
 
-import * as fs from 'fs'
-import * as path from 'path'
-import config from '../config/config'
-import * as Sequelize from 'sequelize'
+import { DataTypes } from 'sequelize';
+import { BaseUser } from './BaseUser';
+import { Comment } from './Comment';
+import { CommentVote } from './CommentVote';
+import { Member } from './Member';
+import { Post } from './Post';
+import { PostVote } from './PostVote';
 
-const sequelize = config.connection;
+BaseUser.hasOne(sequelize.models.Member, { as: 'Member', foreignKey: 'member_id' });
 
-// turns base_user => BaseUser
-function toCamelCase (str) {
-  const _ = str.indexOf("_");
-  if (~_) {
-    return toCamelCase(str.substring(0, _) 
-        + str.substring(_ + 1)
-          .substring(0, 1)
-          .toUpperCase() 
-        + str.substring(_ + 2)
-    )
-  }
-  else {
-    return str.substring(0, 1).toUpperCase() + str.substring(1);
-  }
-}
+PostVote.belongsTo(sequelize.models.Member, {
+  foreignKey: 'member_id',
+  targetKey: 'member_id',
+  as: 'Member',
+});
 
-let models: any = {};
-let modelsLoaded = false;
+PostVote.belongsTo(sequelize.models.Post, {
+  foreignKey: 'post_id',
+  targetKey: 'post_id',
+  as: 'Post',
+});
 
-const createModels = () => {
-  if (modelsLoaded) return models;
+Member.belongsTo(sequelize.models.BaseUser, {
+  foreignKey: 'member_base_id',
+  targetKey: 'base_user_id',
+  as: 'BaseUser',
+});
 
-  // Get all models
-  const modelsList = fs.readdirSync(path.resolve(__dirname, "./"))
-    .filter((t) => (~t.indexOf('.ts') || ~t.indexOf('.js')) && !~t.indexOf("index") && !~t.indexOf(".map"))
-    .map((model) => sequelize.import(__dirname + '/' + model))
+Member.hasMany(sequelize.models.Post, { foreignKey: 'member_id', as: 'Post' });
 
-  // Camel case the models
-  for (let i = 0; i < modelsList.length; i++) {
-    const modelName = toCamelCase(modelsList[i].name);
-    models[modelName] = modelsList[i];
-  }
+Comment.belongsTo(sequelize.models.Member, {
+  foreignKey: 'member_id',
+  targetKey: 'member_id',
+  as: 'Member',
+});
 
-  // Create the relationships for the models;
-  Object.keys(models).forEach((modelName) => {
-    if (models[modelName].associate) {
-      models[modelName].associate(models);
-    }
-  });
+Comment.belongsTo(sequelize.models.Post, {
+  foreignKey: 'post_id',
+  targetKey: 'post_id',
+  as: 'Post',
+});
 
-  models['sequelize'] = sequelize;
-  models['Sequelize'] = Sequelize;
+Comment.hasMany(sequelize.models.CommentVote, { foreignKey: 'comment_id', as: 'CommentVotes' });
 
-  modelsLoaded = true;
+CommentVote.belongsTo(sequelize.models.Member, {
+  foreignKey: 'member_id',
+  targetKey: 'member_id',
+  as: 'Member',
+});
 
-  return models;
-}
+CommentVote.belongsTo(sequelize.models.Comment, {
+  foreignKey: 'comment_id',
+  targetKey: 'comment_id',
+  as: 'Comment',
+});
 
-export default createModels();
+Post.belongsTo(sequelize.models.Member, {
+  foreignKey: 'member_id',
+  targetKey: 'member_id',
+  as: 'Member',
+});
 
-export {
-  createModels
-}
+Post.hasMany(sequelize.models.PostVote, { foreignKey: 'post_id', as: 'Votes' });
+
+export { DataTypes, BaseUser, Comment, CommentVote, Member, Post, PostVote };

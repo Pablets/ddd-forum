@@ -1,2 +1,3 @@
+import { createHooksForAggregateRoots } from './hooks';
 
-import "./hooks"
+createHooksForAggregateRoots();

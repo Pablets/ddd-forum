@@ -1,11 +1,14 @@
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/sequelize';
 
-export default (sequelize, DataTypes) => {
-  const Member = sequelize.define('member', {
+const Member = sequelize.define(
+  'Member',
+  {
     member_id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       allowNull: false,
-      primaryKey: true
+      primaryKey: true,
     },
     member_base_id: {
       type: DataTypes.UUID,
@@ -13,26 +16,25 @@ export default (sequelize, DataTypes) => {
       primaryKey: true,
       references: {
         model: 'base_user',
-        key: 'base_user_id'
-      }, 
+        key: 'base_user_id',
+      },
       onDelete: 'cascade',
       onUpdate: 'cascade',
     },
     reputation: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 0
+      defaultValue: 0,
     },
-  },{
+  },
+  {
     timestamps: true,
-    underscored: true, 
-    tableName: 'member'
-  });
-
-  Member.associate = (models) => {
-    Member.belongsTo(models.BaseUser, { foreignKey: 'member_base_id', targetKey: 'base_user_id', as: 'BaseUser' })
-    Member.hasMany(models.Post, { foreignKey: 'member_id',  as: 'Post' })
+    underscored: true,
+    tableName: 'member',
+    modelName: 'Member',
   }
+);
 
-  return Member;
-};
+
+
+export { Member };

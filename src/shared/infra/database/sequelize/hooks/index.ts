@@ -1,16 +1,13 @@
-
-import models from '../models';
+import { BaseUser, Member, Post } from '../models';
 import { UniqueEntityID } from '../../../../domain/UniqueEntityID';
 import { DomainEvents } from '../../../../domain/events/DomainEvents';
 
 const dispatchEventsCallback = (model: any, primaryKeyField: string) => {
   const aggregateId = new UniqueEntityID(model[primaryKeyField]);
   DomainEvents.dispatchEventsForAggregate(aggregateId);
-}
+};
 
-(async function createHooksForAggregateRoots () {
-  const { BaseUser, Member, Post } = models;
-
+export async function createHooksForAggregateRoots() {
   BaseUser.addHook('afterCreate', (m: any) => dispatchEventsCallback(m, 'base_user_id'));
   BaseUser.addHook('afterDestroy', (m: any) => dispatchEventsCallback(m, 'base_user_id'));
   BaseUser.addHook('afterUpdate', (m: any) => dispatchEventsCallback(m, 'base_user_id'));
@@ -29,7 +26,5 @@ const dispatchEventsCallback = (model: any, primaryKeyField: string) => {
   Post.addHook('afterSave', (m: any) => dispatchEventsCallback(m, 'post_id'));
   Post.addHook('afterUpsert', (m: any) => dispatchEventsCallback(m, 'post_id'));
 
-  console.log('[Hooks]: Sequelize hooks setup.')
-
-
-})();
+  console.log('[Hooks]: Sequelize hooks setup.');
+}

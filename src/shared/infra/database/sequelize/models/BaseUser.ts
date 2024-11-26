@@ -1,53 +1,57 @@
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/sequelize';
 
-export default (sequelize, DataTypes) => {
-  const BaseUser = sequelize.define('base_user', {
+const BaseUser = sequelize.define(
+  'BaseUser',
+  {
     base_user_id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       allowNull: false,
-      primaryKey: true
+      primaryKey: true,
     },
     user_email: {
       type: DataTypes.STRING(250),
       allowNull: false,
-      unique: true
+      unique: true,
     },
     is_email_verified: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: false
+      defaultValue: false,
     },
     is_admin_user: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: false
+      defaultValue: false,
     },
     is_deleted: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: false
+      defaultValue: false,
     },
     username: {
       type: DataTypes.STRING(250),
-      allowNull: false
+      allowNull: false,
+    },
+    social_access_token: {
+      type: DataTypes.STRING(250),
+      allowNull: true,
+      defaultValue: null,
     },
     user_password: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(250),
       allowNull: true,
-      defaultValue: null
+      defaultValue: null,
     },
-  },{
+  },
+  {
     timestamps: true,
-    underscored: true, 
+    underscored: true,
     tableName: 'base_user',
-    indexes: [
-      { unique: true, fields: ['user_email'] },
-    ]
-  });
-
-  BaseUser.associate = (models) => {
-    BaseUser.hasOne(models.Member, { as: 'Member', foreignKey: 'member_id' })
+    modelName: 'BaseUser',
+    indexes: [{ unique: true, fields: ['user_email'] }],
   }
+);
 
-  return BaseUser;
-};
+export { BaseUser };
