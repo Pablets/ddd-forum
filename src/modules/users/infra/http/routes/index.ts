@@ -8,6 +8,7 @@ import { middleware } from '../../../../../shared/infra/http';
 import { getCurrentUserController } from '../../../useCases/getCurrentUser';
 import { refreshAccessTokenController } from '../../../useCases/refreshAccessToken';
 import { logoutController } from '../../../useCases/logout';
+import { loginWithSocialController } from '../../../useCases/loginWithSocial';
 
 const userRouter = express.Router();
 
@@ -22,6 +23,10 @@ userRouter.get('/me',
 
 userRouter.post('/login',
   (req, res) => loginController.execute(req, res)
+)
+
+userRouter.post('/login-with-social',
+  (req, res) => loginWithSocialController.execute(req, res)
 )
 
 userRouter.post('/logout',
