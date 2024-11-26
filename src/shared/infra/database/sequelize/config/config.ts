@@ -10,8 +10,6 @@ const {
   DDD_FORUM_DB_TEST_DB_NAME = 'data_test',
   DDD_FORUM_DB_PROD_DB_NAME = 'data_prod',
   NODE_ENV = 'development',
-  DDD_FORUM_IS_PRODUCTION = 'false',
-  CLEARDB_DATABASE_URL,
 } = process.env;
 
 export const databaseCredentials = {
