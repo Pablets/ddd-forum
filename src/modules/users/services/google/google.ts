@@ -9,7 +9,7 @@ dotenv.config();
 const serviceAccountKeys = readFileSync(process.env.SERVICE_ACCOUNT_KEYS, { encoding: 'utf8' });
 
 const app = admin.initializeApp({
-  credential: admin.credential.cert(serviceAccountKeys as admin.ServiceAccount),
+  credential: admin.credential.cert(JSON.parse(serviceAccountKeys) as admin.ServiceAccount),
 });
 
 const auth = getAuth(app);
