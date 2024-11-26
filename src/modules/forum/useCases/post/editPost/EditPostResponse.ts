@@ -1,11 +1,8 @@
-
-import { Either, Result } from "../../../../../shared/core/Result";
-import { AppError } from "../../../../../shared/core/AppError";
-import { EditPostErrors } from "./EditPostErrors";
+import { Either, Result } from '../../../../../shared/core/Result';
+import { UnexpectedError } from '../../../../../shared/core/AppError';
+import { PostNotFoundError } from './EditPostErrors';
 
 export type EditPostResponse = Either<
-  EditPostErrors.PostNotFoundError | 
-  AppError.UnexpectedError | 
-  Result<any>,
+  PostNotFoundError | UnexpectedError | Result<any>,
   Result<void>
->
+>;

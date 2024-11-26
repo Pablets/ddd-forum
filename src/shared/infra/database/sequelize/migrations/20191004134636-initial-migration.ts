@@ -310,7 +310,7 @@ export default {
     ]);
   },
 
-  down: (queryInterface, Sequelize) => {
+  down: (queryInterface) => {
     return runner.run([() => queryInterface.dropTable('base_user')]);
   },
 };

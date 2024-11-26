@@ -1,42 +1,38 @@
-
-import { UseCase } from "../../../../../shared/core/UseCase";
-import { IMemberRepo } from "../../../repos/memberRepo";
-import { CreateMemberDTO } from "./CreateMemberDTO";
-import { IUserRepo } from "../../../../users/repos/userRepo";
-import { Either, Result, left, right } from "../../../../../shared/core/Result";
-import { AppError } from "../../../../../shared/core/AppError";
-import { CreateMemberErrors } from "./CreateMemberErrors";
-import { User } from "../../../../users/domain/user";
-import { Member } from "../../../domain/member";
+import { UseCase } from '../../../../../shared/core/UseCase';
+import { IMemberRepo } from '../../../repos/memberRepo';
+import { CreateMemberDTO } from './CreateMemberDTO';
+import { IUserRepo } from '../../../../users/repos/userRepo';
+import { Either, Result, left, right } from '../../../../../shared/core/Result';
+import { UnexpectedError } from '../../../../../shared/core/AppError';
+import { MemberAlreadyExistsError, UserDoesntExistError } from './CreateMemberErrors';
+import { User } from '../../../../users/domain/user';
+import { Member } from '../../../domain/member';
 
 type Response = Either<
-  CreateMemberErrors.MemberAlreadyExistsError |
-  CreateMemberErrors.UserDoesntExistError |
-  AppError.UnexpectedError |
-  Result<any>,
+  MemberAlreadyExistsError | UserDoesntExistError | UnexpectedError | Result<any>,
   Result<void>
->
+>;
 
 export class CreateMember implements UseCase<CreateMemberDTO, Promise<Response>> {
   private memberRepo: IMemberRepo;
   private userRepo: IUserRepo;
 
-  constructor (userRepo: IUserRepo, memberRepo: IMemberRepo) {
+  constructor(userRepo: IUserRepo, memberRepo: IMemberRepo) {
     this.userRepo = userRepo;
-    this.memberRepo = memberRepo
+    this.memberRepo = memberRepo;
   }
 
-  public async execute (request: CreateMemberDTO): Promise<Response> {
+  public async execute(request: CreateMemberDTO): Promise<Response> {
     let user: User;
     let member: Member;
     const { userId } = request;
 
     try {
-
       try {
         user = await this.userRepo.getUserByUserId(userId);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
-        return left(new CreateMemberErrors.UserDoesntExistError(userId));
+        return left(new UserDoesntExistError(userId));
       }
 
       try {
@@ -44,12 +40,13 @@ export class CreateMember implements UseCase<CreateMemberDTO, Promise<Response>>
         const memberExists = !!member === true;
 
         if (memberExists) {
-          return left(new CreateMemberErrors.MemberAlreadyExistsError(userId))
+          return left(new MemberAlreadyExistsError(userId));
         }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {}
 
       // Member doesn't exist already (good), so we want to create it
-      const memberOrError: Result<Member> = Member.create({ 
+      const memberOrError: Result<Member> = Member.create({
         userId: user.userId,
         username: user.username,
       });
@@ -63,9 +60,8 @@ export class CreateMember implements UseCase<CreateMemberDTO, Promise<Response>>
       await this.memberRepo.save(member);
 
       return right(Result.ok<void>());
-      
     } catch (err) {
-      return left(new AppError.UnexpectedError(err));
+      return left(new UnexpectedError(err));
     }
 
     return null;

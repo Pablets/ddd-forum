@@ -5,7 +5,6 @@ import { MemberMap } from "../../mappers/memberMap";
 import { MemberDetails } from "../../domain/memberDetails";
 import { MemberDetailsMap } from "../../mappers/memberDetailsMap";
 import { MemberId } from "../../domain/memberId";
-import { UniqueEntityID } from "../../../../shared/domain/UniqueEntityID";
 import { MemberIdMap } from "../../mappers/memberIdMap";
 import { Op } from "sequelize"
 
@@ -39,10 +38,10 @@ export class MemberRepo implements IMemberRepo {
     const MemberModel = this.models.Member;
     const baseQuery = this.createBaseQuery();
     baseQuery.include.push(
-      { 
-        model: this.models.Post, 
-        as: 'Post', 
-        required: true, 
+      {
+        model: this.models.Post,
+        as: 'Post',
+        required: true,
         where: {
           [Op.or]: {
             slug: { [Op.eq]: linkOrSlug },
@@ -104,7 +103,7 @@ export class MemberRepo implements IMemberRepo {
   public async save (member: Member): Promise<void> {
     const MemberModel = this.models.Member;
     const exists = await this.exists(member.userId.getStringValue());
-    
+
     if (!exists) {
       const rawSequelizeMember = await MemberMap.toPersistence(member);
       await MemberModel.create(rawSequelizeMember);

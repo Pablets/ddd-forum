@@ -32,11 +32,11 @@ export class CommentVotesRepo implements ICommentVotesRepo {
   }
 
   async saveBulk (votes: CommentVotes): Promise<any> {
-    for (let vote of votes.getRemovedItems()) {
+    for (const vote of votes.getRemovedItems()) {
       await this.delete(vote);
     }
 
-    for (let vote of votes.getNewItems()) {
+    for (const vote of votes.getNewItems()) {
       await this.save(vote);
     }
   }
@@ -131,7 +131,7 @@ export class CommentVotesRepo implements ICommentVotesRepo {
     return count;
   }
 
-  async countAllPostCommentDownvotesExcludingOP (postId: PostId | String): Promise<number> {
+  async countAllPostCommentDownvotesExcludingOP (postId: PostId | string): Promise<number> {
     postId  = postId instanceof PostId 
     ? (<PostId>postId).getStringValue() 
     : postId;

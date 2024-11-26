@@ -4,8 +4,8 @@ import { UpvotePostDTO } from "./UpvotePostDTO";
 import { IMemberRepo } from "../../../repos/memberRepo";
 import { IPostRepo } from "../../../repos/postRepo";
 import { left, right, Result } from "../../../../../shared/core/Result";
-import { AppError } from "../../../../../shared/core/AppError";
-import { UpvotePostErrors } from "./UpvotePostErrors";
+import { UnexpectedError } from "../../../../../shared/core/AppError";
+import { MemberNotFoundError, PostNotFoundError } from "./UpvotePostErrors";
 import { Member } from "../../../domain/member";
 import { Post } from "../../../domain/post";
 import { IPostVotesRepo } from "../../../repos/postVotesRepo";
@@ -18,7 +18,7 @@ export class UpvotePost implements UseCase<UpvotePostDTO, Promise<UpvotePostResp
   private postRepo: IPostRepo;
   private postVotesRepo: IPostVotesRepo;
   private postService: PostService;
-  
+
   constructor (memberRepo: IMemberRepo, postRepo: IPostRepo, postVotesRepo: IPostVotesRepo, postService: PostService) {
     this.memberRepo = memberRepo;
     this.postRepo = postRepo;
@@ -32,17 +32,19 @@ export class UpvotePost implements UseCase<UpvotePostDTO, Promise<UpvotePostResp
     let existingVotesOnPostByMember: PostVote[];
 
     try {
-      
+
       try {
         member = await this.memberRepo.getMemberByUserId(req.userId);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
-        return left(new UpvotePostErrors.MemberNotFoundError())
+        return left(new MemberNotFoundError())
       }
 
       try {
         post = await this.postRepo.getPostBySlug(req.slug);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
-        return left(new UpvotePostErrors.PostNotFoundError(req.slug));
+        return left(new PostNotFoundError(req.slug));
       }
 
       existingVotesOnPostByMember = await this.postVotesRepo
@@ -54,13 +56,13 @@ export class UpvotePost implements UseCase<UpvotePostDTO, Promise<UpvotePostResp
       if (upvotePostResult.isLeft()) {
         return left(upvotePostResult.value);
       }
-      
+
       await this.postRepo.save(post);
 
       return right(Result.ok<void>())
 
     } catch (err) {
-      return left(new AppError.UnexpectedError(err));
+      return left(new UnexpectedError(err));
     }
   }
 }

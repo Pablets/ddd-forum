@@ -1,6 +1,6 @@
 import { isProduction } from '../../../../config';
 import { IAuthService } from '../../../../modules/users/services/authService';
-const rateLimit = require('express-rate-limit');
+import rateLimit from 'express-rate-limit';
 
 export class Middleware {
   private authService: IAuthService;
@@ -66,7 +66,7 @@ export class Middleware {
           return this.endRequest(
             403,
             'Auth token not found. User is probably not logged in. Please login again.',
-            res
+            res,
           );
         }
       } else {

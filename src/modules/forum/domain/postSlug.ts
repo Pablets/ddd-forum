@@ -42,7 +42,7 @@ export class PostSlug extends ValueObject<PostSlugProps> {
     // Run the slug algorithm here to create a slug
     // Strip all non alphabetic characters such as . / ; ,
     returnSlug = postTitle.value.replace(/[\W_]+/g, " ");
-    returnSlug = TextUtils.createRandomNumericString(7) + "-" + slug(postTitle.value)  ;
+    returnSlug = `${TextUtils.createRandomNumericString(7)  }-${  slug(postTitle.value)}`  ;
 
     return Result.ok<PostSlug>(new PostSlug({ value: returnSlug }));
   }

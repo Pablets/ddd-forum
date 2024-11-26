@@ -17,6 +17,7 @@ export class PostVoteMap implements Mapper<PostVote> {
       type: voteType
     }, new UniqueEntityID(raw.post_vote_id));
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     postVoteOrError.isFailure ? console.log(postVoteOrError.getErrorValue()) : '';
 
     return postVoteOrError.isSuccess ? postVoteOrError.getValue() : null;
@@ -30,5 +31,5 @@ export class PostVoteMap implements Mapper<PostVote> {
       type: vote.type
     }
   }
-  
+
 }

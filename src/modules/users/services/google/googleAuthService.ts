@@ -8,7 +8,8 @@ interface UserInfo {
 export async function getSocialUserInfo(
   accessToken: string,
   provider: 'GOOGLE',
-  nonce: string | null
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _nonce: string | null
 ): Promise<UserInfo | null> {
   let userInfo: UserInfo | null = null;
   switch (provider) {

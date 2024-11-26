@@ -14,10 +14,11 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,
+    "rootDir": ".",
+    "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"],
-    }
+    },
   },
-  "include": ["src/*.ts", "src/**/*.ts", "src/**/*.js"],
-  "exclude": ["node_modules", "src/**/*.spec.ts", "src/**/*.spec.js"]
+  "exclude": ["node_modules", "certs"],
 }

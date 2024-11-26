@@ -20,7 +20,7 @@ export class AfterPostVotesChanged implements IHandle<PostVotesChanged> {
   }
 
   private async onPostVotesChanged (event: CommentVotesChanged): Promise<void> {
-    let postId: PostId = event.post.postId;
+    const postId: PostId = event.post.postId;
     try {
       // Then, update the post stats
       await this.updatePostStats.execute({ postId: postId.getStringValue() });

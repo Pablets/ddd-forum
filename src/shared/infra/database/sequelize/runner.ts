@@ -1,5 +1,5 @@
 async function runner(promises) {
-  for (let command of promises) {
+  for (const command of promises) {
     try {
       await command();
     } catch (err) {

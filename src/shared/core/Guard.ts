@@ -13,7 +13,7 @@ export type GuardArgumentCollection = IGuardArgument[];
 export class Guard {
   
   public static combine (guardResults: Result<any>[]): Result<GuardResponse> {
-    for (let result of guardResults) {
+    for (const result of guardResults) {
       if (result.isFailure) return result;
     }
 
@@ -47,7 +47,7 @@ export class Guard {
   }
 
   public static againstNullOrUndefinedBulk(args: GuardArgumentCollection): Result<GuardResponse> {
-    for (let arg of args) {
+    for (const arg of args) {
       const result = this.againstNullOrUndefined(arg.argument, arg.argumentName);
       if (result.isFailure) return result;
     }
@@ -57,7 +57,7 @@ export class Guard {
 
   public static isOneOf (value: any, validValues: any[], argumentName: string) : Result<GuardResponse> {
     let isValid = false;
-    for (let validValue of validValues) {
+    for (const validValue of validValues) {
       if (value === validValue) {
         isValid = true;
       }
@@ -82,7 +82,7 @@ export class Guard {
   public static allInRange (numbers: number[], min: number, max: number, argumentName: string) : Result<GuardResponse> {
     let failingResult: Result<GuardResponse> = null;
 
-    for(let num of numbers) {
+    for(const num of numbers) {
       const numIsInRangeResult = this.inRange(num, min, max, argumentName);
       if (!numIsInRangeResult.isFailure) failingResult = numIsInRangeResult;
     }

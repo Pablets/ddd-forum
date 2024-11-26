@@ -1,36 +1,31 @@
+import { UseCase } from '../../../../../shared/core/UseCase';
+import { ICommentRepo } from '../../../repos/commentRepo';
+import { GetCommentByCommentIdRequestDTO } from './GetCommentByCommentIdRequestDTO';
+import { Either, Result, left, right } from '../../../../../shared/core/Result';
+import { CommentDetails } from '../../../domain/commentDetails';
+import { UnexpectedError } from '../../../../../shared/core/AppError';
+import { CommentNotFoundError } from './GetCommentByCommentIdErrors';
+import { MemberId } from '../../../domain/memberId';
+import { IMemberRepo } from '../../../repos/memberRepo';
 
-import { UseCase } from "../../../../../shared/core/UseCase";
-import { ICommentRepo } from "../../../repos/commentRepo";
-import { GetCommentByCommentIdRequestDTO } from "./GetCommentByCommentIdRequestDTO";
-import { Either, Result, left, right } from "../../../../../shared/core/Result";
-import { CommentDetails } from "../../../domain/commentDetails";
-import { AppError } from "../../../../../shared/core/AppError";
-import { GetCommentByCommentIdErrors } from "./GetCommentByCommentIdErrors";
-import { MemberId } from "../../../domain/memberId";
-import { IMemberRepo } from "../../../repos/memberRepo";
-import * as express from 'express'
+type Response = Either<CommentNotFoundError | UnexpectedError, Result<CommentDetails>>;
 
-type Response = Either<
-  GetCommentByCommentIdErrors.CommentNotFoundError |
-  AppError.UnexpectedError,
-  Result<CommentDetails>
->
-
-export class GetCommentByCommentId implements UseCase<GetCommentByCommentIdRequestDTO, Promise<Response>> {
+export class GetCommentByCommentId
+  implements UseCase<GetCommentByCommentIdRequestDTO, Promise<Response>>
+{
   private commentRepo: ICommentRepo;
   private memberRepo: IMemberRepo;
 
-  constructor (commentRepo: ICommentRepo, memberRepo: IMemberRepo) {
+  constructor(commentRepo: ICommentRepo, memberRepo: IMemberRepo) {
     this.commentRepo = commentRepo;
     this.memberRepo = memberRepo;
   }
 
-  public async execute (req: GetCommentByCommentIdRequestDTO): Promise<Response> {
+  public async execute(req: GetCommentByCommentIdRequestDTO): Promise<Response> {
     let comment: CommentDetails;
     let memberId: MemberId;
 
     try {
-
       const isAuthenticated = !!req.userId === true;
 
       if (isAuthenticated) {
@@ -38,17 +33,15 @@ export class GetCommentByCommentId implements UseCase<GetCommentByCommentIdReque
       }
 
       try {
-        comment = await this.commentRepo.getCommentDetailsByCommentId(
-          req.commentId,
-          memberId
-        )
+        comment = await this.commentRepo.getCommentDetailsByCommentId(req.commentId, memberId);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
-        return left(new GetCommentByCommentIdErrors.CommentNotFoundError(req.commentId));
+        return left(new CommentNotFoundError(req.commentId));
       }
 
       return right(Result.ok<CommentDetails>(comment));
     } catch (err) {
-      return left(new AppError.UnexpectedError(err));
+      return left(new UnexpectedError(err));
     }
   }
 }

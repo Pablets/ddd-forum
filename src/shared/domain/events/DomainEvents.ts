@@ -34,7 +34,7 @@ export class DomainEvents {
 
   private static findMarkedAggregateByID (id: UniqueEntityID): AggregateRoot<any> {
     let found: AggregateRoot<any> = null;
-    for (let aggregate of this.markedAggregates) {
+    for (const aggregate of this.markedAggregates) {
       if (aggregate.id.equals(id)) {
         found = aggregate;
       }
@@ -73,7 +73,7 @@ export class DomainEvents {
 
     if (this.handlersMap.hasOwnProperty(eventClassName)) {
       const handlers: any[] = this.handlersMap[eventClassName];
-      for (let handler of handlers) {
+      for (const handler of handlers) {
         handler(event);
       }
     }

@@ -1,38 +1,36 @@
-
-import { IPostRepo } from "../postRepo";
-import { PostId } from "../../domain/postId";
-import { Post } from "../../domain/post";
-import { PostMap } from "../../mappers/postMap";
-import { PostDetails } from "../../domain/postDetails";
-import { PostDetailsMap } from "../../mappers/postDetailsMap";
-import { ICommentRepo } from "../commentRepo";
-import { IPostVotesRepo } from "../postVotesRepo";
-import { PostVotes } from "../../domain/postVotes";
-import { MemberId } from "../../domain/memberId";
-import { Comments } from "../../domain/comments";
+import { IPostRepo } from '../postRepo';
+import { PostId } from '../../domain/postId';
+import { Post } from '../../domain/post';
+import { PostMap } from '../../mappers/postMap';
+import { PostDetails } from '../../domain/postDetails';
+import { PostDetailsMap } from '../../mappers/postDetailsMap';
+import { ICommentRepo } from '../commentRepo';
+import { IPostVotesRepo } from '../postVotesRepo';
+import { PostVotes } from '../../domain/postVotes';
+import { Comments } from '../../domain/comments';
 import { sequelize } from '../../../../shared/infra/database/sequelize/config/sequelize';
 
 export class PostRepo implements IPostRepo {
-
   private models: any;
   private commentRepo: ICommentRepo;
   private postVotesRepo: IPostVotesRepo;
 
-  constructor (models: any, commentRepo: ICommentRepo, postVotesRepo: IPostVotesRepo) {
+  constructor(models: any, commentRepo: ICommentRepo, postVotesRepo: IPostVotesRepo) {
     this.models = models;
     this.commentRepo = commentRepo;
     this.postVotesRepo = postVotesRepo;
   }
 
-  private createBaseQuery (): any {
+  private createBaseQuery(): any {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const models = this.models;
     return {
       where: {},
-      include: []
-    }
+      include: [],
+    };
   }
 
-  private createBaseDetailsQuery (): any {
+  private createBaseDetailsQuery(): any {
     const models = this.models;
     return {
       where: {},
@@ -40,83 +38,76 @@ export class PostRepo implements IPostRepo {
         {
           model: models.Member,
           as: 'Member',
-          include: [
-            { model: models.BaseUser, as: 'BaseUser' }
-          ]
-        }
+          include: [{ model: models.BaseUser, as: 'BaseUser' }],
+        },
       ],
       limit: 15,
-      offset: 0
-    }
+      offset: 0,
+    };
   }
 
-  public async getPostByPostId (postId: PostId | string): Promise<Post> {
-    postId  = postId instanceof PostId
-    ? (<PostId>postId).getStringValue()
-    : postId;
+  public async getPostByPostId(postId: PostId | string): Promise<Post> {
+    postId = postId instanceof PostId ? (<PostId>postId).getStringValue() : postId;
     const PostModel = this.models.Post;
     const detailsQuery = this.createBaseQuery();
     detailsQuery.where['post_id'] = postId;
     const post = await PostModel.findOne(detailsQuery);
     const found = !!post === true;
-    if (!found) throw new Error("Post not found");
+    if (!found) throw new Error('Post not found');
     return PostMap.toDomain(post);
   }
 
-  public async getNumberOfCommentsByPostId (postId: PostId | string): Promise<number> {
-    postId  = postId instanceof PostId
-    ? (<PostId>postId).getStringValue()
-    : postId;
+  public async getNumberOfCommentsByPostId(postId: PostId | string): Promise<number> {
+    postId = postId instanceof PostId ? (<PostId>postId).getStringValue() : postId;
 
     const result = await sequelize.query(
-      `SELECT COUNT(*) FROM comment WHERE post_id = "${postId}";`
+      `SELECT COUNT(*) FROM comment WHERE post_id = "${postId}";`,
     );
     const count = result[0][0]['COUNT(*)'];
     return count;
   }
 
-  public async getPostDetailsBySlug (slug: string, offset?: number): Promise<PostDetails> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public async getPostDetailsBySlug(slug: string, offset?: number): Promise<PostDetails> {
     const PostModel = this.models.Post;
     const detailsQuery = this.createBaseDetailsQuery();
     detailsQuery.where['slug'] = slug;
     const post = await PostModel.findOne(detailsQuery);
     const found = !!post === true;
-    if (!found) throw new Error("Post not found");
-    return PostDetailsMap.toDomain(post)
+    if (!found) throw new Error('Post not found');
+    return PostDetailsMap.toDomain(post);
   }
 
-  public async getRecentPosts (offset?: number): Promise<PostDetails[]> {
+  public async getRecentPosts(offset?: number): Promise<PostDetails[]> {
     const PostModel = this.models.Post;
     const detailsQuery = this.createBaseDetailsQuery();
     detailsQuery.offset = offset ? offset : detailsQuery.offset;
 
     const posts = await PostModel.findAll(detailsQuery);
-    return posts.map((p) => PostDetailsMap.toDomain(p))
+    return posts.map((p) => PostDetailsMap.toDomain(p));
   }
 
-  public async getPopularPosts (offset?: number): Promise<PostDetails[]> {
+  public async getPopularPosts(offset?: number): Promise<PostDetails[]> {
     const PostModel = this.models.Post;
     const detailsQuery = this.createBaseDetailsQuery();
     detailsQuery.offset = offset ? offset : detailsQuery.offset;
-    detailsQuery['order'] = [
-      ['points', 'DESC'],
-    ];
+    detailsQuery['order'] = [['points', 'DESC']];
 
     const posts = await PostModel.findAll(detailsQuery);
-    return posts.map((p) => PostDetailsMap.toDomain(p))
+    return posts.map((p) => PostDetailsMap.toDomain(p));
   }
 
-  public async getPostBySlug (slug: string): Promise<Post> {
+  public async getPostBySlug(slug: string): Promise<Post> {
     const PostModel = this.models.Post;
     const detailsQuery = this.createBaseQuery();
     detailsQuery.where['slug'] = slug;
     const post = await PostModel.findOne(detailsQuery);
     const found = !!post === true;
-    if (!found) throw new Error("Post not found");
+    if (!found) throw new Error('Post not found');
     return PostMap.toDomain(post);
   }
 
-  public async exists (postId: PostId): Promise<boolean> {
+  public async exists(postId: PostId): Promise<boolean> {
     const PostModel = this.models.Post;
     const baseQuery = this.createBaseQuery();
     baseQuery.where['post_id'] = postId.getStringValue();
@@ -125,37 +116,34 @@ export class PostRepo implements IPostRepo {
     return found;
   }
 
-  public delete (postId: PostId): Promise<void> {
+  public delete(postId: PostId): Promise<void> {
     const PostModel = this.models.Post;
-    return PostModel.destroy({ where: { post_id: postId.getStringValue() }});
+    return PostModel.destroy({ where: { post_id: postId.getStringValue() } });
   }
 
-  private saveComments (comments: Comments) {
+  private saveComments(comments: Comments) {
     return this.commentRepo.saveBulk(comments.getItems());
   }
 
-  private savePostVotes (postVotes: PostVotes) {
+  private savePostVotes(postVotes: PostVotes) {
     return this.postVotesRepo.saveBulk(postVotes);
   }
 
-  public async save (post: Post): Promise<void> {
+  public async save(post: Post): Promise<void> {
     const PostModel = this.models.Post;
     const exists = await this.exists(post.postId);
     const isNewPost = !exists;
     const rawSequelizePost = await PostMap.toPersistence(post);
 
     if (isNewPost) {
-
       try {
         await PostModel.create(rawSequelizePost);
         await this.saveComments(post.comments);
         await this.savePostVotes(post.getVotes());
-
       } catch (err) {
         await this.delete(post.postId);
-        throw new Error(err.toString())
+        throw new Error(err.toString());
       }
-
     } else {
       // Save non-aggregate tables before saving the aggregate
       // so that any domain events on the aggregate get dispatched
@@ -167,7 +155,7 @@ export class PostRepo implements IPostRepo {
         // the query
         individualHooks: true,
         hooks: true,
-        where: { post_id: post.postId.getStringValue() }
+        where: { post_id: post.postId.getStringValue() },
       });
     }
   }

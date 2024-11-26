@@ -1,7 +1,7 @@
 import { CreateUserDTO } from './CreateUserDTO';
-import { CreateUserErrors } from './CreateUserErrors';
+import { EmailAlreadyExistsError, UsernameTakenError } from './CreateUserErrors';
 import { Either, Result, left, right } from '~/shared/core/Result';
-import { AppError } from '~/shared/core/AppError';
+import { UnexpectedError } from '~/shared/core/AppError';
 import { IUserRepo } from '../../repos/userRepo';
 import { UseCase } from '../../../../shared/core/UseCase';
 import { UserEmail } from '../../domain/userEmail';
@@ -11,9 +11,9 @@ import { User } from '../../domain/user';
 import { SocialAccessToken } from '../../domain/socialAccessToken';
 
 type Response = Either<
-  | CreateUserErrors.EmailAlreadyExistsError
-  | CreateUserErrors.UsernameTakenError
-  | AppError.UnexpectedError
+  | EmailAlreadyExistsError
+  | UsernameTakenError
+  | UnexpectedError
   | Result<any>,
   Result<void>
 >;
@@ -63,7 +63,7 @@ export class CreateUserUseCase implements UseCase<CreateUserDTO, Promise<Respons
       const userAlreadyExists = await this.userRepo.exists(email);
 
       if (userAlreadyExists) {
-        return left(new CreateUserErrors.EmailAlreadyExistsError(email.value)) as Response;
+        return left(new EmailAlreadyExistsError(email.value)) as Response;
       }
 
       try {
@@ -72,8 +72,9 @@ export class CreateUserUseCase implements UseCase<CreateUserDTO, Promise<Respons
         const userNameTaken = !!alreadyCreatedUserByUserName === true;
 
         if (userNameTaken) {
-          return left(new CreateUserErrors.UsernameTakenError(username.value)) as Response;
+          return left(new UsernameTakenError(username.value)) as Response;
         }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {}
 
       const userOrError: Result<User> = User.create({
@@ -93,7 +94,7 @@ export class CreateUserUseCase implements UseCase<CreateUserDTO, Promise<Respons
 
       return right(Result.ok<void>());
     } catch (err) {
-      return left(new AppError.UnexpectedError(err)) as Response;
+      return left(new UnexpectedError(err)) as Response;
     }
   }
 }

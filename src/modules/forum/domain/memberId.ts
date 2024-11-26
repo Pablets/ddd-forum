@@ -19,7 +19,7 @@ export class MemberId extends ValueObject<{ value: UniqueEntityID }> {
   }
 
   public static create (value: UniqueEntityID): Result<MemberId> {
-    let guardResult = Guard.againstNullOrUndefined(value, 'value');
+    const guardResult = Guard.againstNullOrUndefined(value, 'value');
     if (guardResult.isFailure) {
       return Result.fail<MemberId>(guardResult.getErrorValue())
     }

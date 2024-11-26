@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { getRecentPosts } from '../../../../modules/forum/useCases/post/getRecentPosts'
 import { PostDetailsMap } from '../../../../modules/forum/mappers/postDetailsMap'
@@ -26,13 +27,13 @@ const server = new ApolloServer({
   resolvers: {
     DateTime: String,
     Post: {
-      memberPostedBy: async (post, args, context) => {
+      memberPostedBy: async (post, _args, _context) => {
         const memberDetails = await memberRepo.getMemberDetailsByPostLinkOrSlug(post.slug);
         return MemberDetailsMap.toDTO(memberDetails);
       }
     },
     Query: {
-      posts: async (parent, args, context) => {
+      posts: async (_parent, _args, _context) => {
         const response = await getRecentPosts.execute({ });
         if (response.isRight()) {
           const postDetails = response.value.getValue();

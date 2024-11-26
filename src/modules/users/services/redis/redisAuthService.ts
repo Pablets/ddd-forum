@@ -91,7 +91,7 @@ export class RedisAuthService extends AbstractRedisClient implements IAuthServic
    */
 
   public decodeJWT(token: string): Promise<JWTClaims> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       verify(token, authConfig.secret, (err, decoded) => {
         if (err) return resolve(null);
         return resolve(decoded as JWTClaims);

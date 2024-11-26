@@ -19,7 +19,7 @@ export class CommentId extends ValueObject<{ value: UniqueEntityID }> {
   }
 
   public static create (value: UniqueEntityID): Result<CommentId> {
-    let guardResult = Guard.againstNullOrUndefined(value, 'value');
+    const guardResult = Guard.againstNullOrUndefined(value, 'value');
     if (guardResult.isFailure) {
       return Result.fail<CommentId>(guardResult.getErrorValue())
     }

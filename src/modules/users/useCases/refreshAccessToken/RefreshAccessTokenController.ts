@@ -3,7 +3,7 @@
 import { BaseController } from "../../../../shared/infra/http/models/BaseController";
 import { RefreshAccessToken } from "./RefreshAccessToken";
 import { RefreshAccessTokenDTO } from "./RefreshAccessTokenDTO";
-import { RefreshAccessTokenErrors } from "./RefreshAccessTokenErrors";
+import { RefreshTokenNotFound, UserNotFoundOrDeletedError } from "./RefreshAccessTokenErrors";
 import { JWTToken } from "../../domain/jwt";
 import { LoginDTOResponse } from "../login/LoginDTO";
 import * as express from 'express'
@@ -24,11 +24,11 @@ export class RefreshAccessTokenController extends BaseController {
 
       if (result.isLeft()) {
         const error = result.value;
-  
+
         switch (error.constructor) {
-          case RefreshAccessTokenErrors.RefreshTokenNotFound:
+          case RefreshTokenNotFound:
             return this.notFound(res, error.getErrorValue().message)
-            case RefreshAccessTokenErrors.UserNotFoundOrDeletedError:
+            case UserNotFoundOrDeletedError:
               return this.notFound(res, error.getErrorValue().message)
           default:
             return this.fail(res, error.getErrorValue().message);

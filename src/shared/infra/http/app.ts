@@ -5,7 +5,6 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import { v1Router } from './api/v1';
-import { isProduction } from '../../../config';
 
 const origin = {
   // origin: isProduction ? 'https://dddforum.com' : '*',

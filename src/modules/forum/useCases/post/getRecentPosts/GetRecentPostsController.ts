@@ -5,7 +5,6 @@ import { GetRecentPosts } from "./GetRecentPosts";
 import { GetRecentPostsResponseDTO } from "./GetRecentPostsResponseDTO";
 import { PostDetailsMap } from "../../../mappers/postDetailsMap";
 import { DecodedExpressRequest } from "../../../../users/infra/http/models/decodedRequest";
-import * as express from 'express'
 
 export class GetRecentPostsController extends BaseController {
   private useCase: GetRecentPosts;

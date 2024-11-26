@@ -1,19 +1,17 @@
-
-import { Mapper } from "../../../shared/infra/Mapper";
-import { PostDetails } from "../domain/postDetails";
-import { PostDTO } from "../dtos/postDTO";
-import { PostSlug } from "../domain/postSlug";
-import { PostTitle } from "../domain/postTitle";
-import { MemberDetailsMap } from "./memberDetailsMap";
-import { PostType } from "../domain/postType";
-import { PostText } from "../domain/postText";
-import { PostLink } from "../domain/postLink";
-import { PostVoteMap } from "./postVoteMap";
-import { PostVote } from "../domain/postVote";
+import { Mapper } from '../../../shared/infra/Mapper';
+import { PostDetails } from '../domain/postDetails';
+import { PostDTO } from '../dtos/postDTO';
+import { PostSlug } from '../domain/postSlug';
+import { PostTitle } from '../domain/postTitle';
+import { MemberDetailsMap } from './memberDetailsMap';
+import { PostType } from '../domain/postType';
+import { PostText } from '../domain/postText';
+import { PostLink } from '../domain/postLink';
+import { PostVoteMap } from './postVoteMap';
+import { PostVote } from '../domain/postVote';
 
 export class PostDetailsMap implements Mapper<PostDetails> {
-
-  public static toDomain (raw: any): PostDetails {
+  public static toDomain(raw: any): PostDetails {
     const slug = PostSlug.createFromExisting(raw.slug).getValue();
     const title = PostTitle.create({ value: raw.title }).getValue();
     const postType: PostType = raw.type;
@@ -33,15 +31,16 @@ export class PostDetailsMap implements Mapper<PostDetails> {
       text: postType === 'text' ? PostText.create({ value: raw.text }).getValue() : null,
       link: postType === 'link' ? PostLink.create({ url: raw.link }).getValue() : null,
       wasUpvotedByMe: !!votes.find((v) => v.isUpvote()),
-      wasDownvotedByMe: !!votes.find((v) => v.isDownvote())
-    })
+      wasDownvotedByMe: !!votes.find((v) => v.isDownvote()),
+    });
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     postDetailsOrError.isFailure ? console.log(postDetailsOrError.getErrorValue()) : '';
 
     return postDetailsOrError.isSuccess ? postDetailsOrError.getValue() : null;
   }
 
-  public static toDTO (postDetails: PostDetails): PostDTO {
+  public static toDTO(postDetails: PostDetails): PostDTO {
     return {
       slug: postDetails.slug.value,
       title: postDetails.title.value,
@@ -53,7 +52,7 @@ export class PostDetailsMap implements Mapper<PostDetails> {
       link: postDetails.link ? postDetails.link.url : '',
       type: postDetails.postType,
       wasUpvotedByMe: postDetails.wasUpvotedByMe,
-      wasDownvotedByMe: postDetails.wasDownvotedByMe
-    }
-  } 
+      wasDownvotedByMe: postDetails.wasDownvotedByMe,
+    };
+  }
 }

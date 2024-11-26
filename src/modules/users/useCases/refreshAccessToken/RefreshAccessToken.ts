@@ -2,16 +2,16 @@
 import { UseCase } from "../../../../shared/core/UseCase";
 import { IAuthService } from "../../services/authService";
 import { Either, Result, left, right } from "../../../../shared/core/Result";
-import { AppError } from "../../../../shared/core/AppError";
-import { JWTToken, RefreshToken } from "../../domain/jwt";
-import { RefreshAccessTokenErrors } from "./RefreshAccessTokenErrors";
+import { UnexpectedError } from "../../../../shared/core/AppError";
+import { JWTToken } from "../../domain/jwt";
+import { RefreshTokenNotFound, UserNotFoundOrDeletedError } from "./RefreshAccessTokenErrors";
 import { IUserRepo } from "../../repos/userRepo";
 import { User } from "../../domain/user";
 import { RefreshAccessTokenDTO } from "./RefreshAccessTokenDTO";
 
 type Response = Either<
-  RefreshAccessTokenErrors.RefreshTokenNotFound |
-  AppError.UnexpectedError,
+  RefreshTokenNotFound |
+  UnexpectedError,
   Result<JWTToken>
 >
 
@@ -34,18 +34,20 @@ export class RefreshAccessToken implements UseCase<RefreshAccessTokenDTO, Promis
       // Get the username for the user that owns the refresh token
       try {
         username = await this.authService.getUserNameFromRefreshToken(refreshToken);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
-        return left(new RefreshAccessTokenErrors.RefreshTokenNotFound());
+        return left(new RefreshTokenNotFound());
       }
-    
+
 
       try {
         // get the user by username
         user = await this.userRepo.getUserByUserName(username);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
-        return left(new RefreshAccessTokenErrors.UserNotFoundOrDeletedError());
+        return left(new UserNotFoundOrDeletedError());
       }
-      
+
       const accessToken: JWTToken = this.authService.signJWT({
         username: user.username.value,
         email: user.email.value,
@@ -56,15 +58,15 @@ export class RefreshAccessToken implements UseCase<RefreshAccessTokenDTO, Promis
 
       // sign a new jwt for that user
       user.setAccessToken(accessToken, refreshToken);
-        
+
       // save it
-      await this.authService.saveAuthenticatedUser(user); 
+      await this.authService.saveAuthenticatedUser(user);
 
       // return the new access token
       return right(Result.ok<JWTToken>(accessToken))
 
     } catch (err) {
-      return left(new AppError.UnexpectedError(err));
+      return left(new UnexpectedError(err));
     }
   }
 }

@@ -1,16 +1,16 @@
 
 
-import { UseCase } from "../../../../../shared/core/UseCase"; 
+import { UseCase } from "../../../../../shared/core/UseCase";
 import { IPostRepo } from "../../../repos/postRepo";
 import { PostDetails } from "../../../domain/postDetails";
 import { Either, Result, left, right } from "../../../../../shared/core/Result";
-import { AppError } from "../../../../../shared/core/AppError";
-import { GetPostBySlugErrors } from "./GetPostBySlugErrors";
+import { UnexpectedError } from "../../../../../shared/core/AppError";
 import { GetPostBySlugDTO } from "./GetPostBySlugDTO";
+import { PostNotFoundError } from "../upvotePost/UpvotePostErrors";
 
 type Response = Either<
-  GetPostBySlugErrors.PostNotFoundError |
-  AppError.UnexpectedError,
+  PostNotFoundError |
+  UnexpectedError,
   Result<PostDetails>
 >
 
@@ -26,17 +26,18 @@ export class GetPostBySlug implements UseCase<any, Promise<Response>> {
     const { slug } = req;
 
     try {
-      
+
       try {
         postDetails = await this.postRepo.getPostDetailsBySlug(slug);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
-        return left(new GetPostBySlugErrors.PostNotFoundError(slug));
+        return left(new PostNotFoundError(slug));
       }
 
       return right(Result.ok<PostDetails>(postDetails));
 
     } catch (err) {
-      return left(new AppError.UnexpectedError(err));
+      return left(new UnexpectedError(err));
     }
   }
 

@@ -67,11 +67,11 @@ export class PostVotesRepo implements IPostVotesRepo {
   }
 
   async saveBulk (votes: PostVotes): Promise<any> {
-    for (let vote of votes.getRemovedItems()) {
+    for (const vote of votes.getRemovedItems()) {
       await this.delete(vote);
     }
 
-    for (let vote of votes.getNewItems()) {
+    for (const vote of votes.getNewItems()) {
       await this.save(vote);
     }
   }

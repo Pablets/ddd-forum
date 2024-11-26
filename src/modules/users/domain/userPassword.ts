@@ -12,7 +12,7 @@ export interface IUserPasswordProps {
 export class UserPassword extends ValueObject<IUserPasswordProps> {
 
   public static minLength: number = 6;
-  
+
   get value () : string {
     return this.props.value;
   }
@@ -41,7 +41,7 @@ export class UserPassword extends ValueObject<IUserPasswordProps> {
   }
 
   private bcryptCompare (plainText: string, hashed: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       bcrypt.compare(plainText, hashed, (err, compareResult) => {
         if (err) return resolve(false);
         return resolve(compareResult);
@@ -52,7 +52,7 @@ export class UserPassword extends ValueObject<IUserPasswordProps> {
   public isAlreadyHashed (): boolean {
     return this.props.hashed;
   }
-  
+
   private hashPassword (password: string): Promise<string> {
     return new Promise((resolve, reject) => {
       bcrypt.hash(password, null, null, (err, hash) => {

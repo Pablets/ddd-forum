@@ -1,20 +1,18 @@
 import { LoginWithSocialDTO, LoginWithSocialDTOResponse } from './LoginWithSocialDTO';
-import { LoginWithSocialUseCaseErrors } from './LoginWithSocialErrors';
-import { AppError } from '../../../../shared/core/AppError';
+import { AccessTokenNotValidError, UserNameDoesntExistError } from './LoginWithSocialErrors';
+import { UnexpectedError } from '../../../../shared/core/AppError';
 import { Either, Result, left, right } from '../../../../shared/core/Result';
 import { UseCase } from '../../../../shared/core/UseCase';
 import { IUserRepo } from '../../repos/userRepo';
 import { IAuthService } from '../../services/authService';
 import { User } from '../../domain/user';
-import { UserName } from '../../domain/userName';
-import { UserPassword } from '../../domain/userPassword';
 import { JWTToken, RefreshToken } from '../../domain/jwt';
 import { SocialAccessToken } from '../../domain/socialAccessToken';
 
 type Response = Either<
-  | LoginWithSocialUseCaseErrors.AccessTokenNotValidError
-  | LoginWithSocialUseCaseErrors.UserNameDoesntExistError
-  | AppError.UnexpectedError,
+  | AccessTokenNotValidError
+  | UserNameDoesntExistError
+  | UnexpectedError,
   Result<LoginWithSocialDTOResponse>
 >;
 
@@ -47,7 +45,7 @@ export class LoginWithSocialUserUseCase implements UseCase<LoginWithSocialDTO, P
       const userFound = !!user;
 
       if (!userFound) {
-        return left(new LoginWithSocialUseCaseErrors.UserNameDoesntExistError());
+        return left(new UserNameDoesntExistError());
       }
 
       const accessToken: JWTToken = this.authService.signJWT({
@@ -71,7 +69,7 @@ export class LoginWithSocialUserUseCase implements UseCase<LoginWithSocialDTO, P
         })
       );
     } catch (err) {
-      return left(new AppError.UnexpectedError(err.toString()));
+      return left(new UnexpectedError(err.toString()));
     }
   }
 }

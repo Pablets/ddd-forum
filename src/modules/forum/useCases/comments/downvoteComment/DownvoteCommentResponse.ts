@@ -1,15 +1,13 @@
+import { Either, Result } from '../../../../../shared/core/Result';
 
-import { Either, Result } from "../../../../../shared/core/Result";
-
-import { AppError } from "../../../../../shared/core/AppError";
-import { DownvoteCommentErrors } from "./DownvoteCommentErrors";
+import { UnexpectedError } from '../../../../../shared/core/AppError';
+import {
+  CommentNotFoundError,
+  MemberNotFoundError,
+  PostNotFoundError,
+} from './DownvoteCommentErrors';
 
 export type DownvoteCommentResponse = Either<
-  DownvoteCommentErrors.CommentNotFoundError |
-  DownvoteCommentErrors.MemberNotFoundError |
-  DownvoteCommentErrors.PostNotFoundError |
-  AppError.UnexpectedError |
-  Result<any>,
+  CommentNotFoundError | MemberNotFoundError | PostNotFoundError | UnexpectedError | Result<any>,
   Result<void>
->
-
+>;

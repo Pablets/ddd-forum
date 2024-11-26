@@ -44,7 +44,7 @@ export class Comment extends Entity<CommentProps> {
   }
 
   get points (): number {
-    let initialValue = this.props.points;
+    const initialValue = this.props.points;
     return initialValue 
       + this.computeVotePoints()
   }
@@ -52,7 +52,7 @@ export class Comment extends Entity<CommentProps> {
   private computeVotePoints (): number {
     let tally = 0;
     
-    for (let vote of this.props.votes.getNewItems()) {
+    for (const vote of this.props.votes.getNewItems()) {
 
       if (vote.isUpvote()) {
         tally++;
@@ -63,7 +63,7 @@ export class Comment extends Entity<CommentProps> {
       }
     } 
 
-    for (let vote of this.props.votes.getRemovedItems()) {
+    for (const vote of this.props.votes.getRemovedItems()) {
 
       if (vote.isUpvote()) {
         tally--;

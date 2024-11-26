@@ -1,26 +1,25 @@
-
 import { Guard, GuardResponse } from './Guard'
 import { Result } from './Result'
 
 describe('guard', () => {
 
   let result: Result<GuardResponse>;
-  let argName = 'testArgument'
-  let secondaryArgName = 'secondaryTestArgument'
+  const argName = 'testArgument'
+  const secondaryArgName = 'secondaryTestArgument'
 
   beforeEach(() => {
-    result = null;
+    result = Result.ok<GuardResponse>();
   });
 
   describe('combined results', () => {
-    
+
     it ('knows that two successful results equates to success', () => {
       result = Guard.combine([Result.ok<any>(), Result.ok<any>()]);
       expect(result.isSuccess).toBeTruthy();
     });
 
     it ('knows that one success, one failure equates to overall failure', () => {
-      let failureMessage = 'This one failed';
+      const failureMessage = 'This one failed';
       result = Guard.combine([Result.ok<any>(), Result.fail<any>(failureMessage)]);
       expect(result.isSuccess).toBeFalsy();
       expect(result.isFailure).toBeTruthy();
@@ -85,5 +84,5 @@ describe('guard', () => {
     });
 
   })
-  
+
 })

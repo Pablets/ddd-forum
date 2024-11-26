@@ -1,13 +1,12 @@
-
-import { IHandle } from "../../../shared/domain/events/IHandle";
-import { DomainEvents } from "../../../shared/domain/events/DomainEvents";
-import { CommentPosted } from "../domain/events/commentPosted";
-import { UpdatePostStats } from "../useCases/post/updatePostStats/UpdatePostStats";
+import { IHandle } from '../../../shared/domain/events/IHandle';
+import { DomainEvents } from '../../../shared/domain/events/DomainEvents';
+import { CommentPosted } from '../domain/events/commentPosted';
+import { UpdatePostStats } from '../useCases/post/updatePostStats/UpdatePostStats';
 
 export class AfterCommentPosted implements IHandle<CommentPosted> {
   private updatePostStats: UpdatePostStats;
 
-  constructor (updatePostStats: UpdatePostStats) {
+  constructor(updatePostStats: UpdatePostStats) {
     this.setupSubscriptions();
     this.updatePostStats = updatePostStats;
   }
@@ -17,14 +16,15 @@ export class AfterCommentPosted implements IHandle<CommentPosted> {
     DomainEvents.register(this.onCommentPosted.bind(this), CommentPosted.name);
   }
 
-  private async onCommentPosted (event: CommentPosted): Promise<void> {
-
+  private async onCommentPosted(event: CommentPosted): Promise<void> {
     try {
       await this.updatePostStats.execute({ postId: event.post.postId.getStringValue() });
       console.log(`[AfterCommentPosted]: Updated post stats for {${event.post.title.value}}`);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
-      console.log(`[AfterCommentPosted]: Failed to update post stats for {${event.post.title.value}}`);
+      console.log(
+        `[AfterCommentPosted]: Failed to update post stats for {${event.post.title.value}}`,
+      );
     }
   }
-
 }

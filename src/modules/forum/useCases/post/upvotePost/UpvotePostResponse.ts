@@ -1,13 +1,8 @@
-
-import { Either, Result } from "../../../../../shared/core/Result";
-import { UpvotePostErrors } from "./UpvotePostErrors";
-import { AppError } from "../../../../../shared/core/AppError";
+import { Either, Result } from '../../../../../shared/core/Result';
+import { AlreadyUpvotedError, MemberNotFoundError, PostNotFoundError } from './UpvotePostErrors';
+import { UnexpectedError } from '../../../../../shared/core/AppError';
 
 export type UpvotePostResponse = Either<
-  UpvotePostErrors.MemberNotFoundError |
-  UpvotePostErrors.AlreadyUpvotedError |
-  UpvotePostErrors.PostNotFoundError |
-  AppError.UnexpectedError |
-  Result<any>,
+  MemberNotFoundError | AlreadyUpvotedError | PostNotFoundError | UnexpectedError | Result<any>,
   Result<void>
->
+>;

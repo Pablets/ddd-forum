@@ -6,7 +6,7 @@ import { postRouter } from '../../../../modules/forum/infra/http/routes/post';
 
 const v1Router = express.Router();
 
-// @ts-ignore
+// @ts-expect-error ts(6133)
 v1Router.get('/', (req, res) => {
   return res.json({ message: "Yo! we're up" });
 })
