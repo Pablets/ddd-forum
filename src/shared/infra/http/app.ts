@@ -23,7 +23,7 @@ app.use(morgan('combined'))
 
 app.use('/api/v1', v1Router)
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5001;
 
 app.listen(port, () => {
   console.log(`[App]: Listening on port ${port}`)

@@ -1,7 +1,7 @@
 
 import { getRecentPosts } from '../../../../modules/forum/useCases/post/getRecentPosts'
 import { PostDetailsMap } from '../../../../modules/forum/mappers/postDetailsMap'
-import { GraphQLDateTime } from 'graphql-iso-date';
+// import { GraphQLDateTime } from 'graphql-iso-date';
 import { memberRepo } from '../../../../modules/forum/repos'
 import { MemberDetailsMap } from '../../../../modules/forum/mappers/memberDetailsMap'
 import { ApolloServer, gql } from 'apollo-server-express';
@@ -19,12 +19,12 @@ const typeDefs = gql`
 
 const server = new ApolloServer({
   typeDefs: [
-    typeDefs, 
-    ForumTypeDefs, 
+    typeDefs,
+    ForumTypeDefs,
     UserTypeDefs
   ],
   resolvers: {
-    DateTime: GraphQLDateTime,
+    DateTime: String,
     Post: {
       memberPostedBy: async (post, args, context) => {
         const memberDetails = await memberRepo.getMemberDetailsByPostLinkOrSlug(post.slug);
